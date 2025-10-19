@@ -595,7 +595,7 @@ int upload_file(SSHConnectionState& connection, string& localFile) {
 	}
 	return 0;
 }
-int main() {
+int upp() {
 	SSHConnectionInfo connInfo = {
 		"127.0.0.1",    // 本地地址
 		8080,          // 本地转发端口

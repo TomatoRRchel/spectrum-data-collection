@@ -1,0 +1,8 @@
+﻿  cla.cpp
+F:\wr\learn\cla.cpp(31,12): warning C4067: 预处理器指令后有意外标记 - 应输入换行符
+F:\wr\learn\cla.cpp(118,27): warning C4101: “e”: 未引用的局部变量
+F:\wr\learn\cla.cpp(174,27): warning C4101: “e”: 未引用的局部变量
+F:\wr\learn\cla.cpp(235,27): warning C4101: “e”: 未引用的局部变量
+  learn.vcxproj -> F:\wr\x64\Debug\learn.exe
+  'pwsh.exe' 不是内部或外部命令，也不是可运行的程序
+  或批处理文件。

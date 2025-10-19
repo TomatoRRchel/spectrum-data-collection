@@ -7,6 +7,11 @@
 #include <string>
 #include <iterator>
 #include <algorithm>
+#include "ssh_function.h"
+
+#define NUM 2
+#define TIME_TEST
+
 using namespace std;
 enum class FileState {
 	WAIT,
@@ -23,7 +28,8 @@ public:
 	fileManager() {
 		files.push_back({ "./data0.txt",FileState::WAIT });
 		files.push_back({ "./data1.txt",FileState::WAIT });
-		files.push_back({ "./data2.txt",FileState::WAIT });
+#if NUM==3	files.push_back({ "./data2.txt",FileState::WAIT });
+#endif
 	}
 
 	fileInfo& get_file_w() {
@@ -54,13 +60,15 @@ vector < int > dat(256);
 //ofstream file;
 ofstream output_file("./1.txt");
 fileManager file_Manager;
-vector<mutex> mut_arr(3);
+vector<mutex> mut_arr(NUM);
 unsigned int ccount = 0;
-void write() {
+void thread_write() {
 	//dat.clear();
 	while (1) {
 		try {
+#ifdef TIME_TEST
 			auto start = chrono::high_resolution_clock::now();
+#endif			
 			fileInfo& file_temp = file_Manager.get_file_w();
 			//cout << "find_file:" << file_temp.filename << "---write" << endl;
 
@@ -68,20 +76,19 @@ void write() {
 			{
 			case '0':mut_arr[0].lock(); break;
 			case '1':mut_arr[1].lock(); break;
+#if NUM==3
+
 			case '2':mut_arr[2].lock(); break;
+#endif
 			default:
 				break;
 			}
-
 			ofstream w_file(file_temp.filename);
-
 			for (unsigned char i = 0; ; i++)
 			{
 				dat[i] = ccount++;
-
 				if (i == 255)
 				{
-
 					break;
 				}
 			}
@@ -93,16 +100,20 @@ void write() {
 			{
 			case '0':mut_arr[0].unlock(); break;
 			case '1':mut_arr[1].unlock(); break;
+#if NUM==3
 			case '2':mut_arr[2].unlock(); break;
+#endif
 			default:
 				break;
 			}
-			//cout << "********write over unlock*************" << endl;
+			cout << "********write over unlock*************" << endl;
 			file_temp.state = FileState::READY;
 			//clock_t end = clock();
+#ifdef TIME_TEST
 			auto end = chrono::high_resolution_clock::now();
 			chrono::duration<double, std::milli> elapsed = end - start;
-			cout << "W time used: " << elapsed.count() << " s\n";
+			cout << "W time used: " << elapsed.count() << " ms\n";
+#endif
 		}
 		catch (const exception& e) {
 			;//cerr << "Error in write: " << e.what() << endl;
@@ -117,14 +128,18 @@ void read() {
 	//get_string.clear();
 	while (1) {
 		try {
+#ifdef TIME_TEST
 			auto start = chrono::high_resolution_clock::now();
+#endif
 			fileInfo& file_temp = file_Manager.get_file_r();
 			//cout << "find_file:" << file_temp.filename << "---read" << endl;
 			switch (file_temp.filename[6])
 			{
 			case '0':mut_arr[0].lock(); break;
 			case '1':mut_arr[1].lock(); break;
+#if NUM==3			
 			case '2':mut_arr[2].lock(); break;
+#endif
 			default:
 				break;
 			}
@@ -150,16 +165,80 @@ void read() {
 			//cout << "------------read last data:" << get_string.back() << "-------------" << endl;
 			//for_each(get_string.begin(), get_string.end(), myp);
 			file_temp.state = FileState::WAIT;
+#ifdef TIME_TEST
 			auto end = chrono::high_resolution_clock::now();
 			chrono::duration<double, std::milli> elapsed = end - start;
-			cout << "R time used: " << elapsed.count() << " s\n";
+			cout << "R time used: " << elapsed.count() << " ms\n";
+#endif
 		}
 		catch (const exception& e) {
 			;//cerr << "Error in read: " << e.what() << endl;
 		}
 	}
 }
+void up() {
+	SSHConnectionInfo connInfo = {
+		"127.0.0.1",    // 本地地址
+		8080,          // 本地转发端口
+		"root",// 目标服务器用户名
+		"074678" // 目标服务器密码
+	};
+	// 远程目录
+	SSHConnectionState connection;
+	if (global_init(connection, connInfo)) {
+		cout << "init failed" << endl;
+	}
 
+	while (1) {
+		try {
+#ifdef TIME_TEST
+			auto start = chrono::high_resolution_clock::now();
+#endif
+			fileInfo& file_temp = file_Manager.get_file_r();
+			cout << "find_file:" << file_temp.filename << "---read" << endl;
+			switch (file_temp.filename[6])
+			{
+			case '0':mut_arr[0].lock(); break;
+			case '1':mut_arr[1].lock(); break;
+#if NUM==3			
+			case '2':mut_arr[2].lock(); break;
+#endif
+			default:
+				break;
+			}
+			string localFile = file_temp.filename;
+			upload_file(connection, localFile);
+
+
+
+
+			switch (file_temp.filename[6])
+			{
+			case '0':mut_arr[0].unlock(); break;
+			case '1':mut_arr[1].unlock(); break;
+#ifdef TIME_TEST
+			case '2':mut_arr[2].unlock(); break;
+#endif
+			default:
+				break;
+			}
+			//cout << "------------read last data:" << get_string.back() << "-------------" << endl;
+			//for_each(get_string.begin(), get_string.end(), myp);
+			file_temp.state = FileState::WAIT;
+#ifdef TIME_TEST
+			auto end = chrono::high_resolution_clock::now();
+			chrono::duration<double, std::milli> elapsed = end - start;
+			cout << "R time used: " << elapsed.count() << " ms\n";
+#endif
+
+		}
+		catch (const exception& e) {
+			;//cerr << "Error in read: " << e.what() << endl;
+		}
+	}
+	disconnectSSH(connection);
+	cleanupGlobal();
+}
 int Count = 0;
 mutex mut;
 void task_0(int par) {
@@ -189,8 +268,8 @@ void task_1() {
 }
 int main() {
 
-	thread t1(write);
-	thread t2(read);
+	thread t1(thread_write);
+	thread t2(up);
 	t1.join();
 	t2.join();
 	//write();

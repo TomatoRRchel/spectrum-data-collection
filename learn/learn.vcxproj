@@ -20,6 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cla.cpp" />
+    <ClCompile Include="ssh_function.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ssh_function.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
