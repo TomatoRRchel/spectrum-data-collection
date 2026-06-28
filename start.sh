@@ -48,8 +48,16 @@ compile_ipc_daemon() {
     log_success "编译完成: $BUILD_DIR/$IPC_DAEMON"
 }
 
+compile_cli() {
+    log_info "编译 CLI 控制器..."
+    gcc -o "$BUILD_DIR/cli_control" \
+        ${S_DIR}/cli_control.c \
+        ${IPC_DIR}/ipc_client.c ${IPC_DIR}/shm_ipc.c \
+        -I${S_DIR} -I${IPC_DIR} -lpthread || return 1
+    log_success "编译完成: $BUILD_DIR/cli_control"
+}
+
 compile_spectrum_app() {
-    log_info "编译频谱仪采集程序..."
     local HTRA_INC="-I${S_DIR} -I${IPC_DIR} -I${SPECTRUM_DIR} -I${HTRA_SDK}/inc"
     local HTRA_LIB="-L${HTRA_SDK}/lib/${TARG} -Wl,-rpath='${HTRA_SDK}/lib/${TARG}'"
     g++ -std=c++11 -pthread -o "$BUILD_DIR/$SPECTRUM_APP" \
@@ -227,7 +235,8 @@ main() {
         start)
             mkdir -p "$BUILD_DIR" "$LOG_DIR"
             compile_ipc_daemon || exit 1
-            compile_spectrum_app || exit 1      # 保留编译频谱仪采集程序
+            compile_spectrum_app || exit 1
+            compile_cli || exit 1
             start_ipc_daemon_terminal
             # 修改点：启动 GUI 终端，替代原来的 start_spectrum_terminal
             start_gui_terminal
