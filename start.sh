@@ -10,7 +10,7 @@ set -e
 BUILD_DIR="./build"
 LOG_DIR="./logs"
 IPC_DAEMON="ipc_mgr"
-SPECTRUM_APP="spectrum"                # 频谱仪采集程序（consumer）
+SPECTRUM_APP="spectrum"                # 频谱仪采集程序
 GUI_SCRIPT="gui.py"                    # 前端脚本
 IPC_SOCKET_PATH="/tmp/ipc_mgr_socket"
 
@@ -32,19 +32,36 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
+S_DIR="src"
+IPC_DIR="${S_DIR}/ipc"
+SPECTRUM_DIR="${S_DIR}/spectrum"
+HTRA_SDK="/opt/htraapi"
+TARG="x86_64"
+
 # ==================== 编译 ====================
 compile_ipc_daemon() {
     log_info "编译 IPC 守护进程..."
     mkdir -p "$BUILD_DIR"
-    gcc -o "$BUILD_DIR/$IPC_DAEMON" ipc_mgr.c shm_ipc.c -lpthread || return 1
+    gcc -o "$BUILD_DIR/$IPC_DAEMON" \
+        ${IPC_DIR}/ipc_mgr.c ${IPC_DIR}/shm_ipc.c \
+        -I${S_DIR} -lpthread || return 1
     log_success "编译完成: $BUILD_DIR/$IPC_DAEMON"
 }
 
 compile_spectrum_app() {
     log_info "编译频谱仪采集程序..."
-    g++ -std=c++11 -o "$BUILD_DIR/$SPECTRUM_APP" \
-        main.cpp idefine_fun.cpp producer.cpp uploader.cpp \
-        ipc_client.c shm_ipc.c -lpthread -lrt || return 1
+    local HTRA_INC="-I${S_DIR} -I${IPC_DIR} -I${SPECTRUM_DIR} -I${HTRA_SDK}/inc"
+    local HTRA_LIB="-L${HTRA_SDK}/lib/${TARG} -Wl,-rpath='${HTRA_SDK}/lib/${TARG}'"
+    g++ -std=c++11 -pthread -o "$BUILD_DIR/$SPECTRUM_APP" \
+        ${SPECTRUM_DIR}/main.cpp \
+        ${SPECTRUM_DIR}/producer.cpp \
+        ${SPECTRUM_DIR}/producer_device.cpp \
+        ${SPECTRUM_DIR}/uploader.cpp \
+        ${SPECTRUM_DIR}/idefine_fun.cpp \
+        ${SPECTRUM_DIR}/Error_handling.cpp \
+        ${IPC_DIR}/ipc_client.c \
+        ${IPC_DIR}/shm_ipc.c \
+        $HTRA_INC $HTRA_LIB -lhtraapi -lssh2 -lrt || return 1
     log_success "编译完成: $BUILD_DIR/$SPECTRUM_APP"
 }
 
