@@ -1,0 +1,13 @@
+#include "htra_api.h"
+#define EXAMPLE_MACRO_NAME
+#define TIME_OUT 10000
+
+void Device_Open_ErrorHandling(int Status, void **Device, int DevNum, BootProfile_TypeDef *BootProfile, BootInfo_TypeDef *BootInfo);                                                                                                                                 // 设备打开过程中的异常处理
+void SWP_Configuration_ErrorHandling(int Status, void **Device, int DevNum, BootProfile_TypeDef *BootProfile, BootInfo_TypeDef *BootInfo, SWP_Profile_TypeDef *SWP_ProfileIn, SWP_Profile_TypeDef *SWP_ProfileOut, SWP_TraceInfo_TypeDef *TraceInfo);                // SWP模式配置参数时的异常处理
+void IQS_Configuration_ErrorHandling(int Status, void **Device, int DevNum, BootProfile_TypeDef *BootProfile, BootInfo_TypeDef *BootInfo, IQS_Profile_TypeDef *IQS_ProfileIn, IQS_Profile_TypeDef *IQS_ProfileOut, IQS_StreamInfo_TypeDef *StreamInfo);              // IQS模式配置参数时的异常处理
+void DET_Configuration_ErrorHandling(int Status, void **Device, int DevNum, BootProfile_TypeDef *BootProfile, BootInfo_TypeDef *BootInfo, DET_Profile_TypeDef *DET_ProfileIn, DET_Profile_TypeDef *DET_ProfileOut, DET_StreamInfo_TypeDef *StreamInfo);              // DET模式配置参数时的异常处理
+void RTA_Configuration_ErrorHandling(int Status, void **Device, int DevNum, BootProfile_TypeDef *BootProfile, BootInfo_TypeDef *BootInfo, RTA_Profile_TypeDef *RTA_ProfileIn, RTA_Profile_TypeDef *RTA_ProfileOut, RTA_FrameInfo_TypeDef *FrameInfo);                // RTA模式配置参数时的异常处理
+void SWP_ErrorHandlingExceptOpenAndConfiguration(int &Status, void **Device, int DevNum, BootProfile_TypeDef *BootProfile, BootInfo_TypeDef *BootInfo, SWP_Profile_TypeDef *SWP_ProfileIn, SWP_Profile_TypeDef *SWP_ProfileOut, SWP_TraceInfo_TypeDef *TraceInfo);   // SWP模式除打开设备和配置参数外其他函数调用的异常处理
+void IQS_ErrorHandlingExceptOpenAndConfiguration(int &Status, void **Device, int DevNum, BootProfile_TypeDef *BootProfile, BootInfo_TypeDef *BootInfo, IQS_Profile_TypeDef *IQS_ProfileIn, IQS_Profile_TypeDef *IQS_ProfileOut, IQS_StreamInfo_TypeDef *StreamInfo); // IQS模式除打开设备和配置参数外其他函数调用的异常处理
+void DET_ErrorHandlingExceptOpenAndConfiguration(int &Status, void **Device, int DevNum, BootProfile_TypeDef *BootProfile, BootInfo_TypeDef *BootInfo, DET_Profile_TypeDef *DET_ProfileIn, DET_Profile_TypeDef *DET_ProfileOut, DET_StreamInfo_TypeDef *StreamInfo); // DET模式除打开设备和配置参数外其他函数调用的异常处理
+void RTA_ErrorHandlingExceptOpenAndConfiguration(int &Status, void **Device, int DevNum, BootProfile_TypeDef *BootProfile, BootInfo_TypeDef *BootInfo, RTA_Profile_TypeDef *RTA_ProfileIn, RTA_Profile_TypeDef *RTA_ProfileOut, RTA_FrameInfo_TypeDef *FrameInfo);   // RTA模式除打开设备和配置参数外其他函数调用的异常处理
