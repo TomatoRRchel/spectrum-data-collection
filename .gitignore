@@ -3,3 +3,5 @@ data*
 IQS_GetIQToTxt.cpp
 test
 ./ref
+data*.txt
+.gitignore
